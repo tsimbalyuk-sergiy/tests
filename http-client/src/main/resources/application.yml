@@ -1,0 +1,5 @@
+micronaut:
+  application:
+    name: httpClient
+  server:
+    port: 8030
