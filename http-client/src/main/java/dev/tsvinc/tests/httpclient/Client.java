@@ -105,7 +105,9 @@ public final class Client {
             .doOnError(
                 throwable -> {
                   log.error("test >> throwable: {}", throwable.getMessage());
-                });
+                })
+            .subscribe((stringHttpResponse, throwable) -> {});
+
     /*.subscribeWith(
     new DisposableSingleObserver<HttpResponse<String>>() {
       @Override
