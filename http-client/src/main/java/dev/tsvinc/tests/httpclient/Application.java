@@ -1,4 +1,4 @@
-package dev.tsvinc.tests;
+package dev.tsvinc.tests.httpclient;
 
 import io.micronaut.runtime.Micronaut;
 

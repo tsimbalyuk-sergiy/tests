@@ -3,3 +3,5 @@ micronaut:
     name: httpClient
   server:
     port: 8030
+app:
+  timeout: 5

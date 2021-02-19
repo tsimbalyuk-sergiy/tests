@@ -18,7 +18,7 @@
     <jdk.version>11</jdk.version>
     <release.version>11</release.version>
     <micronaut.version>2.3.2</micronaut.version>
-    <exec.mainClass>dev.tsvinc.tests.Application</exec.mainClass>
+    <exec.mainClass>dev.tsvinc.tests.httpclient.Application</exec.mainClass>
     <micronaut.runtime>netty</micronaut.runtime>
   </properties>
 

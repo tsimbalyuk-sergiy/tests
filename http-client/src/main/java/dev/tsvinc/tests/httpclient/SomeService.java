@@ -1,4 +1,4 @@
-package dev.tsvinc.tests;
+package dev.tsvinc.tests.httpclient;
 
 import io.micronaut.http.HttpResponse;
 import org.slf4j.Logger;

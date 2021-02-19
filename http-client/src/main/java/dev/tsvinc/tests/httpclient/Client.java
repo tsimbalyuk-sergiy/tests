@@ -1,4 +1,4 @@
-package dev.tsvinc.tests;
+package dev.tsvinc.tests.httpclient;
 
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -12,7 +12,12 @@ import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.http.HttpClient;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Controller
 public final class Client {
@@ -20,9 +25,10 @@ public final class Client {
   private final SomeService someService;
   private static final Logger log = LoggerFactory.getLogger(Client.class);
 
-  public Client(RxHttpClient rxHttpClient, SomeService someService) {
+  public Client(RxHttpClient rxHttpClient, SomeService someService, HttpClient httpsClient) {
     this.rxHttpClient = rxHttpClient;
     this.someService = someService;
+    this.httpsClient = httpsClient;
   }
 
   @Get("200")
@@ -52,17 +58,102 @@ public final class Client {
     //      ;
   }
 
+  //  private static final HttpClient httpClient =
+  //      HttpClient.newBuilder()
+  //          .version(HttpClient.Version.HTTP_2)
+  //          .connectTimeout(Duration.ofSeconds(10))
+  //          .build();
+  private final java.net.http.HttpClient httpsClient;
+
+  @Get("500ahc")
+  public void get500Ahc() throws InterruptedException, ExecutionException, TimeoutException {
+
+    java.net.http.HttpRequest request =
+        java.net.http.HttpRequest.newBuilder()
+            .GET()
+            .uri(URI.create("http://localhost:8020/500"))
+            .setHeader("User-Agent", "Java 11 HttpClient Bot")
+            .build();
+
+    Void response =
+        this.httpsClient
+            .sendAsync(request, java.net.http.HttpResponse.BodyHandlers.ofString())
+            .exceptionally(
+                throwable -> {
+                  log.error("test >> throwable: {}", throwable.getMessage());
+                  return null;
+                })
+            .thenAccept(httpResponse -> log.info("@@@{}", httpResponse.statusCode()))
+            .get(5, TimeUnit.SECONDS);
+  }
+
   @Get("500")
   public void get500() {
     HttpRequest<String> request =
         HttpRequest.GET("http://localhost:8020/500").body("hello").accept(MediaType.ALL);
-    rxHttpClient
-        .exchange(request, String.class)
-        .doOnNext(stringHttpResponse -> log.info(""))
-        .doOnError(throwable -> log.info("500_doOnError: {}", throwable.getMessage()))
-        .subscribe(
-            o -> log.info("got: {}", o),
-            throwable -> log.error("error_in_subscribe: {}", throwable.getMessage()));
+    final var subscribe =
+        rxHttpClient
+            .exchange(request, String.class)
+            .singleOrError()
+            .doOnSuccess(
+                stringHttpResponse -> {
+                  log.info(
+                      "test: {}, {}",
+                      stringHttpResponse.getStatus().getCode(),
+                      stringHttpResponse.getStatus().getReason());
+                })
+            .doOnError(
+                throwable -> {
+                  log.error("test >> throwable: {}", throwable.getMessage());
+                });
+    /*.subscribeWith(
+    new DisposableSingleObserver<HttpResponse<String>>() {
+      @Override
+      public void onSuccess(@NonNull HttpResponse<String> stringHttpResponse) {
+        log.info(
+            "test: {}, {}",
+            stringHttpResponse.getStatus().getCode(),
+            stringHttpResponse.getStatus().getReason());
+      }
+
+      @Override
+      public void onError(@NonNull Throwable e) {
+        log.error("test >> throwable: {}", e.getMessage());
+      }
+    })*/ ;
+    /*.subscribe(
+    (stringHttpResponse, throwable) -> {
+      if (null != throwable) {
+        log.error("test >> throwable: {}", throwable.getMessage());
+      } else {
+        log.info(
+            "test: {}, {}",
+            stringHttpResponse.getStatus().getCode(),
+            stringHttpResponse.getStatus().getReason());
+      }
+    });*/
+
+    //                o -> {
+    //                  log.info("test: {}, {}", o.getStatus().getCode(),
+    // o.getStatus().getReason());
+    //                },
+    //                throwable -> {
+    //                  log.error("test >> throwable: {}", throwable.getMessage());
+    //                },
+    //                () -> log.info("finished"));
+    /*while (!subscribe.isDisposed()) {
+      if (subscribe.isDisposed()) {
+        log.info("subscribe disposed: {}", LocalDateTime.now());
+      } else {
+        log.info("subscribe not disposed: {}", LocalDateTime.now());
+      }
+    }*/
+    //            .doOnSuccess(o -> log.info("got: {}", o))
+    //            .doOnError(throwable -> log.info("500_doOnError: {}", throwable.getMessage()));
+    //    if (!subscribe.isDisposed()) {
+    //      subscribe.dispose();
+    //    }
+
   }
 
   @Get("bad")
