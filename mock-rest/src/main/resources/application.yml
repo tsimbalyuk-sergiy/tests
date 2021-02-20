@@ -3,3 +3,15 @@ micronaut:
     name: mockRest
   server:
     port: 8020
+    netty:
+      parent:
+        executor: yolo
+  executors:
+    yolo:
+      core-pool-size: 4
+      type: fixed
+  netty:
+    event-loops:
+      yolo:
+        executor: yolo
+        num-threads: 4

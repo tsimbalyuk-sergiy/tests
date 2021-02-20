@@ -106,6 +106,7 @@ public final class Client {
                 throwable -> {
                   log.error("test >> throwable: {}", throwable.getMessage());
                 })
+            .timeout(5L, TimeUnit.SECONDS)
             .subscribe((stringHttpResponse, throwable) -> {});
 
     /*.subscribeWith(
@@ -122,7 +123,8 @@ public final class Client {
       public void onError(@NonNull Throwable e) {
         log.error("test >> throwable: {}", e.getMessage());
       }
-    })*/ ;
+    })*/
+    ;
     /*.subscribe(
     (stringHttpResponse, throwable) -> {
       if (null != throwable) {

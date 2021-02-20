@@ -3,5 +3,10 @@ micronaut:
     name: httpClient
   server:
     port: 8030
+  http:
+    client:
+      pool:
+        enabled: true
+        max-connections: 4
 app:
   timeout: 5
